@@ -1,15 +1,15 @@
 {
   "$schema": "https://dl.viam.dev/module.schema.json",
-  "module_id": "hunter:video-playback",
+  "module_id": "viam-soleng:video-playback",
   "visibility": "public",
-  "url": "https://github.com/hunter-volkman/viam-video-playback",
+  "url": "https://github.com/viam-soleng/viam-video-playback",
   "description": "Camera component for local video file playback",
   "models": [
     {
       "api": "rdk:component:camera",
-      "model": "hunter:video-playback:camera",
+      "model": "viam-soleng:video-playback:camera",
       "short_description": "Camera component for local video file playback",
-      "markdown_link": "README.md#model-huntervideo-playbackcamera"
+      "markdown_link": "README.md#model-viam-solengvideo-playbackcamera"
     }
   ],
   "entrypoint": "run.sh"
