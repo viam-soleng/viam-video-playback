@@ -196,27 +196,58 @@ bool VideoPlaybackCamera::initialize_decoder(const std::string& path) {
             
             // Actually try to open and test decode
             if (avcodec_open2(test_ctx, test_decoder, nullptr) == 0) {
-                // Test decode one frame to verify it works
+                // Test decode with multiple frames (for decoder delay)
                 AVPacket* test_pkt = av_packet_alloc();
                 AVFrame* test_frame = av_frame_alloc();
                 bool works = false;
                 
-                if (av_read_frame(format_ctx_, test_pkt) == 0 &&
-                    test_pkt->stream_index == video_stream_index_) {
-                    if (avcodec_send_packet(test_ctx, test_pkt) == 0) {
-                        if (avcodec_receive_frame(test_ctx, test_frame) == 0) {
-                            // Verify pixel format is valid
-                            if (test_frame->format != AV_PIX_FMT_NONE &&
-                                test_frame->width > 0 && test_frame->height > 0) {
-                                works = true;
-                                decoder_ = test_decoder;
-                                std::cout << "Hardware decoder " << dec_name
-                                         << " verified working (format: "
-                                         << av_get_pix_fmt_name((AVPixelFormat)test_frame->format)
-                                         << ")" << std::endl;
+                // Try N packets to get a decoded frame
+                // Handles B-frame delay and initial buffering
+                int packets_tried = 0;
+                int max_packets = 10;
+                
+                while (packets_tried < max_packets && !works) {
+                    if (av_read_frame(format_ctx_, test_pkt) == 0) {
+                        if (test_pkt->stream_index == video_stream_index_) {
+                            // Send packet to decoder
+                            int send_ret = avcodec_send_packet(test_ctx, test_pkt);
+                            if (send_ret >= 0) {
+                                // Try to receive frame
+                                // May return EAGAIN (if more packets are required)
+                                int recv_ret = avcodec_receive_frame(test_ctx, test_frame);
+                                if (recv_ret == 0) {
+                                    // Verify pixel format is valid
+                                    if (test_frame->format != AV_PIX_FMT_NONE &&
+                                        test_frame->width > 0 && test_frame->height > 0) {
+                                        works = true;
+                                        decoder_ = test_decoder;
+                                        std::cout << "Hardware decoder " << dec_name
+                                                 << " verified working after " << (packets_tried + 1) 
+                                                 << " packets (format: "
+                                                 << av_get_pix_fmt_name((AVPixelFormat)test_frame->format)
+                                                 << ")" << std::endl;
+                                    }
+                                } else if (recv_ret == AVERROR(EAGAIN)) {
+                                    // Decoder needs more data
+                                    // Continue feeding packets
+                                    packets_tried++;
+                                } else {
+                                    // Actual error
+                                    // Stop trying this decoder
+                                    break;
+                                }
+                            } else {
+                                // Failed to send packet
+                                // Stop trying
+                                break;
                             }
                         }
+                    } else {
+                        // Failed to read packet
+                        // Stop trying
+                        break;
                     }
+                    av_packet_unref(test_pkt);
                 }
                 
                 av_packet_free(&test_pkt);
@@ -280,7 +311,8 @@ bool VideoPlaybackCamera::initialize_decoder(const std::string& path) {
         av_strerror(ret, errbuf, sizeof(errbuf));
         std::cerr << "Error: Failed to open decoder: " << errbuf << std::endl;
         
-        // If hardware decoder failed, try falling back to software
+        // Hardware decoder failed
+        // Try falling back to software
         if (use_hardware_acceleration_) {
             std::cout << "Hardware decoder failed, falling back to software decoder" << std::endl;
             avcodec_free_context(&decoder_ctx_);
