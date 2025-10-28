@@ -17,13 +17,13 @@ extern "C" {
 }
 #pragma GCC diagnostic pop
 
-namespace hunter {
+namespace viam_soleng {
 namespace video_playback {
 
 namespace vs = viam::sdk;
 
 vs::Model VideoPlaybackCamera::model() {
-    return vs::Model{"hunter", "video-playback", "camera"};
+    return vs::Model{"viam_soleng", "video-playback", "camera"};
 }
 
 std::shared_ptr<vs::Resource> VideoPlaybackCamera::create(
@@ -825,4 +825,4 @@ std::vector<vs::GeometryConfig> VideoPlaybackCamera::get_geometries(
 }
 
 } // namespace video_playback
-} // namespace hunter
+} // namespace viam_soleng

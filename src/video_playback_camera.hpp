@@ -19,7 +19,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-namespace hunter {
+namespace viam_soleng {
 namespace video_playback {
 
 struct EncodingTask {
@@ -141,4 +141,4 @@ private:
 };
 
 } // namespace video_playback
-} // namespace hunter
+} // namespace viam_soleng

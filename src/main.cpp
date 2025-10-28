@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
     
     std::shared_ptr<ModelRegistration> mr = std::make_shared<ModelRegistration>(
         camera_api,
-        hunter::video_playback::VideoPlaybackCamera::model(),
+        viam_soleng::video_playback::VideoPlaybackCamera::model(),
         [](Dependencies deps, ResourceConfig cfg) -> std::shared_ptr<Resource> { 
-            return hunter::video_playback::VideoPlaybackCamera::create(deps, cfg); 
+            return viam_soleng::video_playback::VideoPlaybackCamera::create(deps, cfg); 
         }
     );
 
