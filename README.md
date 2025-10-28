@@ -1,7 +1,7 @@
 # Video Playback Module
 A Viam `camera` component for local video file playback with hardware acceleration support.
 
-## Model `hunter:video-playback:camera`
+## Model `viam-soleng:video-playback:camera`
 This model implements the `rdk:component:camera` API to stream a video file as a camera component, enabling repetable testing of ML vision services with consistent input. Supports hardware-accelerated H.264/HEVC decoding on NVIDIA Jetson platform. Automatic fallback to software decoding.
 
 ### Configuration
